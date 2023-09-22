@@ -1,32 +1,23 @@
-import pytest
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By  # Импортируем By для использования селектора по имени
+from selene import be, have
+from selene.support.shared import browser
 
 
-@pytest.fixture(scope="module")
-def browser():
-    # Инициализация веб-драйвера (здесь используется Chrome)
-    driver = webdriver.Chrome()
-
-    # Установка размера окна браузера
-    driver.set_window_size(1200, 800)
-
-    yield driver
-
-
-    # Завершение работы браузера после выполнения тестов
-    driver.quit()
-
-
-def test_google_search(browser):
+def test_google_search():
     # Открытие Google
-    browser.get("https://www.google.com")
+    browser.open("https://www.google.com")
 
     # Поиск по запросу "yashaka/selene"
-    search_input = browser.find_element(By.NAME, "q")  # Используем By.NAME для поиска по имени
-    search_input.send_keys("yashaka/selene")
-    search_input.send_keys(Keys.RETURN)
+    browser.element('#APjFqb').should(be.blank).type('yashaka/selene').press_enter()
 
     # Проверка наличия текста на странице
-    assert "yashaka/selene: User-oriented Web UI browser tests in ..." in browser.page_source
+    browser.element('h3').should(have.text("yashaka/selene: User-oriented Web UI browser"))
+
+def test_google_search_negative():
+    # Открытие Google
+    browser.open("https://www.google.com")
+
+    # Поиск по запросу "yashaka/selene"
+    browser.element('#APjFqb').should(be.blank).type('nvdjsnvkhsbdlkewjfoiahsdukfb').press_enter()
+
+    # Проверка наличия текста на странице
+    browser.element('#result-stats').should(have.text("Результатов: примерно 0"))
